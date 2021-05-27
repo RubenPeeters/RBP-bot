@@ -1,0 +1,13 @@
+discord.py==1.6.0
+git+https://github.com/ssut/py-googletrans@master
+git+https://github.com/Rapptz/discord-ext-menus@84caae8038d0d
+lxml
+psutil
+asyncpg>=0.12.0
+click
+parsedatetime
+lru_dict
+python-dateutil
+pygit2
+youtube-dl
+pynacl

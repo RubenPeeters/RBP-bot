@@ -1,0 +1,10 @@
+node_modules/*
+
+*.json
+!migrations/*
+migrations/current-*.json
+
+*.pyc
+*.log
+venv/*
+config.py

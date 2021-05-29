@@ -61,7 +61,7 @@ class PerformanceMocker:
 
     def __bool__(self):
         return False
-# test
+
 class GlobalChannel(commands.Converter):
     async def convert(self, ctx, argument):
         try:
@@ -174,7 +174,6 @@ class Admin(commands.Cog):
 
         async with ctx.typing():
             stdout, stderr = await self.run_process('git pull')
-        print("out:", stdout, "err: ", stderr)
 
         # progress and stuff is redirected to stderr in git pull
         # however, things like "fast forward" and files

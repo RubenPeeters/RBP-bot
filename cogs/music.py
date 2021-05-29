@@ -3,6 +3,7 @@ from .utils import checks
 import discord
 import googletrans
 import io
+import numpy as np
 
 from discord.ext import commands
 import discord
@@ -11,7 +12,8 @@ import youtube_dl
 import logging
 import math
 from urllib import request
-from .video import Video
+from .videos import Videos
+import pprint
 
 # TODO: abstract FFMPEG options into their own file?
 FFMPEG_BEFORE_OPTS = '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5'
@@ -172,7 +174,7 @@ class Music(commands.Cog):
         state.now_playing = song
         state.skip_votes = set()  # clear skip votes
         source = discord.PCMVolumeTransformer(
-            discord.FFmpegPCMAudio(song.stream_url, before_options=FFMPEG_BEFORE_OPTS), volume=state.volume)
+            discord.FFmpegPCMAudio(song["formats"][0]["url"], before_options=FFMPEG_BEFORE_OPTS), volume=state.volume)
 
         def after_playing(err):
             if len(state.playlist) > 0:
@@ -203,11 +205,14 @@ class Music(commands.Cog):
 
     def _queue_text(self, queue):
         """Returns a block of text describing a given song queue."""
-        if len(queue) > 0:
-            message = [f"{len(queue)} songs in queue:"]
+        print(queue[0])
+        if len(queue[0]) > 0:
+            message = [f"{len(queue[0])} songs in queue:"]
             message += [
-                f"  {index+1}. **{song.title}** (requested by **{song.requested_by.name}**)"
-                for (index, song) in enumerate(queue)
+                
+                f"  {index+1}. **{song['title']}** (requested by **{song['requested_by'].name}**)"
+                for (index, song) in enumerate(queue[0])
+                # set_thumbnail(url=video["thumbnail"] if "thumbnail" in video else None)
             ]  # add individual songs
             return "\n".join(message)
         else:
@@ -247,36 +252,40 @@ class Music(commands.Cog):
 
         if client and client.channel:
             try:
-                video = Video(url, ctx.author)
+                # is now a list of all videos, or one video but still a list.
+                videos = Videos(url, ctx.author)
             except youtube_dl.DownloadError as e:
                 logging.warn(f"Error downloading video: {e}")
                 await ctx.send(
-                    "There was an error downloading your video, sorry.")
+                    "There was an error downloading your video(s), sorry.")
                 return
-            state.playlist.append(video)
+            state.playlist.append(videos)
             message = await ctx.send(
-                "Added to queue.", embed=video.get_embed())
+                # TODO: change embed for playlists
+                "Added to queue.", embed=videos.get_embed(videos[0]))
             await self._add_reaction_controls(message)
         else:
             if ctx.author.voice is not None and ctx.author.voice.channel is not None:
                 channel = ctx.author.voice.channel
                 try:
-                    video = Video(url, ctx.author)
+                    videos = Videos(url, ctx.author)
                 except youtube_dl.DownloadError as e:
                     await ctx.send(
-                        "There was an error downloading your video, sorry.")
+                        "There was an error downloading your video(s), sorry.")
                     return
                 client = await channel.connect()
-                self._play_song(client, state, video)
-                message = await ctx.send("", embed=video.get_embed())
+                # TODO: Find mistake that makes it that the first song is added twice.
+                state.playlist.append(videos)
+                self._play_song(client, state, videos[0])
+                message = await ctx.send("", embed=videos.get_embed(videos[0]))
                 await self._add_reaction_controls(message)
-                logging.info(f"Now playing '{video.title}'")
+                logging.info(f"Now playing '{videos[0]['title']}'")
             else:
                 raise commands.CommandError(
                     "You need to be in a voice channel to do that.")
 
     async def on_reaction_add(self, reaction, user):
-        """Respods to reactions added to the bot's messages, allowing reactions to control playback."""
+        """Responds to reactions added to the bot's messages, allowing reactions to control playback."""
         message = reaction.message
         if user != self.bot.user and message.author == self.bot.user:
             await message.remove_reaction(reaction, user)
@@ -334,7 +343,7 @@ class GuildState:
         self.now_playing = None
 
     def is_requester(self, user):
-        return self.now_playing.requested_by == user
+        return self.now_playing['requested_by'] == user
 
 def setup(bot):
     bot.add_cog(Music(bot))

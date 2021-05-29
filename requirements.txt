@@ -11,3 +11,4 @@ python-dateutil
 pygit2
 youtube-dl
 pynacl
+numpy

@@ -193,7 +193,7 @@ class Music(commands.Cog):
     async def nowplaying(self, ctx):
         """Displays information about the current song."""
         state = self.get_state(ctx.guild)
-        message = await ctx.send("", embed=state.now_playing.get_embed())
+        message = await ctx.send("", embed=Videos.get_embed(video=state.now_playing))
         await self._add_reaction_controls(message)
 
     @commands.command()
@@ -202,15 +202,11 @@ class Music(commands.Cog):
     async def shuffle(self, ctx):
         """Shuffles the current playlist"""
         state = self.get_state(ctx.guild)
-        print(len(state.playlist))
         order = list(range(0,(len(state.playlist))))
-        print(order)
         random.shuffle(order)
-        print(order)
         new_playlist = []
         for i in order:
             new_playlist.append(state.playlist[i])
-        print(len(new_playlist))
         state.playlist = new_playlist
         await ctx.send(f"Playlist is shuffled. Next song is **{state.playlist[0]['title']}**")
 
@@ -279,7 +275,7 @@ class Music(commands.Cog):
             state.playlist.extend(videos)
             message = await ctx.send(
                 # TODO: change embed for playlists
-                "Added to queue.", embed=videos.get_embed(videos[0]))
+                "Added to queue.", embed=Videos.get_embed(videos[0]))
             await self._add_reaction_controls(message)
         else:
             if ctx.author.voice is not None and ctx.author.voice.channel is not None:
@@ -291,10 +287,9 @@ class Music(commands.Cog):
                         "There was an error downloading your video(s), sorry.")
                     return
                 client = await channel.connect()
-                # TODO: Find mistake that makes it that the first song is added twice.
                 state.playlist.extend(videos[1:])
                 self._play_song(client, state, videos[0])
-                message = await ctx.send("", embed=videos.get_embed(videos[0]))
+                message = await ctx.send("", embed=Videos.get_embed(videos[0]))
                 await self._add_reaction_controls(message)
                 logging.info(f"Now playing '{videos[0]['title']}'")
             else:
@@ -355,7 +350,7 @@ class GuildState:
 
     def __init__(self):
         self.volume = 1.0
-        self.playlist = []
+        self.playlist = Videos()
         self.skip_votes = set()
         self.now_playing = None
 

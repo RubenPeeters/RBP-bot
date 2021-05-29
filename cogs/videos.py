@@ -11,49 +11,36 @@ YTDL_OPTS = {
 
 
 class Videos(list):
-    """Class containing information about a batch of videos all requested by the same person."""
-    # TODO: We want the videos to always be a list (size=1 when only one video).
-    #       We then use this to alter current implementation.
+    """Class containing information about a batch of videos"""
 
-    def __init__(self, url_or_search, requested_by:discord.User):
+    def __init__(self, url_or_search=None, requested_by:discord.User=None):
         """Plays audio from (or searches for) a URL."""
         with ytdl.YoutubeDL(YTDL_OPTS) as ydl:
-            self.requested_by = requested_by
-            self._get_info(url_or_search)
-            # video_format = video["formats"][0]
-            # self.stream_url = video_format["url"]
-            # self.video_url = video["webpage_url"]
-            # self.title = video["title"]
-            # self.uploader = video["uploader"] if "uploader" in video else ""
-            # self.thumbnail = video[
-            #     "thumbnail"] if "thumbnail" in video else None
-            
-
+            if requested_by: self.requested_by = requested_by
+            if url_or_search: self._get_info(url_or_search)            
 
     def _get_info(self, video_url):
+        N = 20
         with ytdl.YoutubeDL(YTDL_OPTS) as ydl:
             info = ydl.extract_info(video_url, download=False)
-            # TODO: make iterative so that every video gets loaded in (max = N).
             if "_type" in info and info["_type"] == "playlist":
+                count = 0
                 for entry in info["entries"]:
-                    # print(entry)
                     self._get_info(entry["url"])
-
-                # return self._get_info(
-                #     info["entries"][0]["url"])  # get info for first video
+                    count += 1
+                    if count >= N:
+                        break
             else:
                 info["requested_by"] = self.requested_by
                 self.append(info)
-                # print(info)
-                # print("=========================", len(self))
 
-    def get_embed(self, video):
+    def get_embed(video):
         """Makes an embed out of this Video's information."""
         embed = discord.Embed(
             title=video["title"], description=video["uploader"] if "uploader" in video else "", url=video["webpage_url"])
         embed.set_footer(
-            text=f"Requested by {self.requested_by.name}",
-            icon_url=self.requested_by.avatar_url)
+            text=f"Requested by {video['requested_by'].name}",
+            icon_url=video['requested_by'].avatar_url)
         thumbnail = video["thumbnail"] if "thumbnail" in video else None
         if thumbnail:
             embed.set_thumbnail(url=thumbnail)

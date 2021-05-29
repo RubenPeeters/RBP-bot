@@ -259,42 +259,42 @@ class Music(commands.Cog):
     @commands.guild_only()
     async def play(self, ctx, *, url):
         """Plays audio hosted at <url> (or performs a search for <url> and plays the first result)."""
+        async with ctx.typing():
+            client = ctx.guild.voice_client
+            state = self.get_state(ctx.guild)  # get the guild's state
 
-        client = ctx.guild.voice_client
-        state = self.get_state(ctx.guild)  # get the guild's state
-
-        if client and client.channel:
-            try:
-                # is now a list of all videos, or one video but still a list.
-                videos = Videos(url, ctx.author)
-            except youtube_dl.DownloadError as e:
-                logging.warn(f"Error downloading video: {e}")
-                await ctx.send(
-                    "There was an error downloading your video(s), sorry.")
-                return
-            state.playlist.extend(videos)
-            message = await ctx.send(
-                # TODO: change embed for playlists
-                "Added to queue.", embed=Videos.get_embed(videos[0]))
-            await self._add_reaction_controls(message)
-        else:
-            if ctx.author.voice is not None and ctx.author.voice.channel is not None:
-                channel = ctx.author.voice.channel
+            if client and client.channel:
                 try:
+                    # is now a list of all videos, or one video but still a list.
                     videos = Videos(url, ctx.author)
                 except youtube_dl.DownloadError as e:
+                    logging.warn(f"Error downloading video: {e}")
                     await ctx.send(
                         "There was an error downloading your video(s), sorry.")
                     return
-                client = await channel.connect()
-                state.playlist.extend(videos[1:])
-                self._play_song(client, state, videos[0])
-                message = await ctx.send("", embed=Videos.get_embed(videos[0]))
+                state.playlist.extend(videos)
+                message = await ctx.send(
+                    # TODO: change embed for playlists
+                    "Added to queue.", embed=Videos.get_embed(videos[0]))
                 await self._add_reaction_controls(message)
-                logging.info(f"Now playing '{videos[0]['title']}'")
             else:
-                raise commands.CommandError(
-                    "You need to be in a voice channel to do that.")
+                if ctx.author.voice is not None and ctx.author.voice.channel is not None:
+                    channel = ctx.author.voice.channel
+                    try:
+                        videos = Videos(url, ctx.author)
+                    except youtube_dl.DownloadError as e:
+                        await ctx.send(
+                            "There was an error downloading your video(s), sorry.")
+                        return
+                    client = await channel.connect()
+                    state.playlist.extend(videos[1:])
+                    self._play_song(client, state, videos[0])
+                    message = await ctx.send("", embed=Videos.get_embed(videos[0]))
+                    await self._add_reaction_controls(message)
+                    logging.info(f"Now playing '{videos[0]['title']}'")
+                else:
+                    raise commands.CommandError(
+                        "You need to be in a voice channel to do that.")
 
     async def on_reaction_add(self, reaction, user):
         """Responds to reactions added to the bot's messages, allowing reactions to control playback."""

@@ -4,6 +4,7 @@ import discord
 import googletrans
 import io
 import numpy as np
+import random
 
 from discord.ext import commands
 import discord
@@ -195,6 +196,24 @@ class Music(commands.Cog):
         message = await ctx.send("", embed=state.now_playing.get_embed())
         await self._add_reaction_controls(message)
 
+    @commands.command()
+    @commands.guild_only()
+    @commands.check(audio_playing)
+    async def shuffle(self, ctx):
+        """Shuffles the current playlist"""
+        state = self.get_state(ctx.guild)
+        print(len(state.playlist))
+        order = list(range(0,(len(state.playlist))))
+        print(order)
+        random.shuffle(order)
+        print(order)
+        new_playlist = []
+        for i in order:
+            new_playlist.append(state.playlist[i])
+        print(len(new_playlist))
+        state.playlist = new_playlist
+        await ctx.send(f"Playlist is shuffled. Next song is **{state.playlist[0]['title']}**")
+
     @commands.command(aliases=["q", "playlist"])
     @commands.guild_only()
     @commands.check(audio_playing)
@@ -205,14 +224,12 @@ class Music(commands.Cog):
 
     def _queue_text(self, queue):
         """Returns a block of text describing a given song queue."""
-        print(queue[0])
-        if len(queue[0]) > 0:
-            message = [f"{len(queue[0])} songs in queue:"]
+        if len(queue) > 0:
+            message = [f"{len(queue)} songs in queue:"]
             message += [
                 
                 f"  {index+1}. **{song['title']}** (requested by **{song['requested_by'].name}**)"
-                for (index, song) in enumerate(queue[0])
-                # set_thumbnail(url=video["thumbnail"] if "thumbnail" in video else None)
+                for (index, song) in enumerate(queue)
             ]  # add individual songs
             return "\n".join(message)
         else:
@@ -259,7 +276,7 @@ class Music(commands.Cog):
                 await ctx.send(
                     "There was an error downloading your video(s), sorry.")
                 return
-            state.playlist.append(videos)
+            state.playlist.extend(videos)
             message = await ctx.send(
                 # TODO: change embed for playlists
                 "Added to queue.", embed=videos.get_embed(videos[0]))
@@ -275,7 +292,7 @@ class Music(commands.Cog):
                     return
                 client = await channel.connect()
                 # TODO: Find mistake that makes it that the first song is added twice.
-                state.playlist.append(videos)
+                state.playlist.extend(videos[1:])
                 self._play_song(client, state, videos[0])
                 message = await ctx.send("", embed=videos.get_embed(videos[0]))
                 await self._add_reaction_controls(message)

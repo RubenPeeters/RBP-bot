@@ -58,14 +58,12 @@ async def in_voice_channel(ctx):
 
 async def is_audio_requester(ctx):
     """Checks that the command sender is the song requester."""
-    music = ctx.bot.get_cog("Music")
-    state = music.get_state(ctx.guild)
     permissions = ctx.channel.permissions_for(ctx.author)
-    if permissions.administrator or state.is_requester(ctx.author):
+    if permissions.administrator:
         return True
     else:
         raise commands.CommandError(
-            "You need to be the song requester to do that.")
+            "You need to be an admin to do that.")
 
 class MusicTable(db.Table, table_name="playlists"):
     id = db.PrimaryKeyColumn()
@@ -180,12 +178,6 @@ class Music(commands.Cog):
                         f"{user.mention} voted to skip ({len(state.skip_votes)}/{required_votes} votes)"
                     )
 
-    async def update_player(self, guild):
-        state = self.get_state(guild)
-        if state.now_playing is None:
-            await state.player.delete()
-        else:
-            await state.player.edit(embed=Videos.get_embed(state.now_playing))
     
     def _pause_audio(self, client):
         if client.is_paused():
@@ -226,27 +218,27 @@ class Music(commands.Cog):
                 'uploader': state.now_playing['uploader'],
             })
 
-    def get_state(self, guild):
+    def get_state(self, ctx):
         """Gets the state for `guild`, creating it if it does not exist."""
-        if guild.id in self.states:
-            return self.states[guild.id]
+        if ctx.guild.id in self.states:
+            return self.states[ctx.guild.id]
         else:
-            self.states[guild.id] = GuildState()
-            return self.states[guild.id]
+            self.states[ctx.guild.id] = GuildState(ctx)
+            return self.states[ctx.guild.id]
 
-    def _vote_skip(self, channel, member):
+    def _vote_skip(self, ctx, member):
         """Register a vote for `member` to skip the song playing."""
         logging.info(f"{member.name} votes to skip")
-        state = self.get_state(channel.guild)
+        state = self.get_state(ctx)
         state.skip_votes.add(member)
         users_in_channel = len([
-            member for member in channel.members if not member.bot
+            member for member in ctx.channel.members if not member.bot
         ])  # don't count bots
         if (float(len(state.skip_votes)) /
                 users_in_channel) >= self.vote_skip_ratio:
             # enough members have voted to skip, so skip the song
             logging.info(f"Enough votes, skipping...")
-            channel.guild.voice_client.stop()
+            ctx.channel.guild.voice_client.stop()
 
     def _play_song(self, client, state, song):
         state.now_playing = song
@@ -452,7 +444,7 @@ class Music(commands.Cog):
     @commands.check(audio_playing)
     async def nowplaying(self, ctx):
         """Displays information about the current song."""
-        state = self.get_state(ctx.guild)
+        state = self.get_state(ctx)
         await state.player.delete()
         message = await ctx.send("", embed=Videos.get_embed(video=state.now_playing))
         await self._add_reaction_controls(message)
@@ -463,7 +455,7 @@ class Music(commands.Cog):
     @commands.check(audio_playing)
     async def shuffle(self, ctx):
         """Shuffles the current playlist"""
-        state = self.get_state(ctx.guild)
+        state = self.get_state(ctx)
         order = list(range(0,(len(state.queue))))
         random.shuffle(order)
         new_playlist = []

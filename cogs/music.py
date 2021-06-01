@@ -195,6 +195,7 @@ class Music(commands.Cog):
         query = """SELECT *
                    FROM playlists
                    WHERE author_id=$1 AND name=$2 
+                   ORDER BY id
                    LIMIT 20;
                 """
         return await ctx.db.fetch(query, ctx.author.id, playlist_name)
@@ -282,7 +283,32 @@ class Music(commands.Cog):
             q.get_nowait()
             q.task_done()
 
-    @commands.command(aliases=["pllist","playplaylist"])
+    async def delete_from_playlist(self, ctx, id, playlist_name):
+        query = """DELETE
+                   FROM playlists
+                   WHERE playlists.author_id=$1 AND playlists.id=$2 AND playlists.name=$3;
+                """
+        try:
+            await self.bot.pool.execute(query, ctx.author.id, int(id), playlist_name)
+        except Exception as e:
+            await ctx.send(e)
+
+    @commands.command(aliases=["plremove"])
+    @commands.guild_only()
+    @commands.has_permissions(administrator=True)
+    async def playlist_remove(self, ctx, id,*, playlistname = 'default'):
+        """
+            Delete a song from your playlist by ID and playlistname
+            Playlist defaults to 'default'.
+        """
+        try:
+            await self.delete_from_playlist(ctx, id, playlistname)
+            message = f"{id} was deleted from {playlistname}."
+            await ctx.send(message)
+        except:
+            raise commands.CommandError("Something went wrong while loading your playlist.")
+
+    @commands.command(aliases=["pllist"])
     @commands.guild_only()
     @commands.has_permissions(administrator=True)
     async def playlist_list(self, ctx, *, playlistname = 'default'):
@@ -291,9 +317,16 @@ class Music(commands.Cog):
             Playlist defaults to 'default'.
         """
         try:
+            count = 0
             songs = await self.get_playlist(ctx, playlistname)
+            message = f"```ini\n{playlistname}:\n"
             for song in songs:
-                print(song)
+                count += 1
+                message += f"\t[ID]: {song['id']} - [Title]: {song['title']}\n"
+                if count > 10:
+                    break
+            message += "```"
+            await ctx.send(message)
         except:
             raise commands.CommandError("Something went wrong while loading your playlist.")
 
@@ -452,7 +485,7 @@ class Music(commands.Cog):
             return await ctx.send('There are currently no more queued songs.')
 
         # Grab up to 10 entries from the queue...
-        upcoming = list(itertools.islice(player.queue._queue, 0, 10))
+        upcoming = list(itertools.islice(player.queue, 0, 10))
 
         fmt = '\n'.join(f'**`{_["title"]}`**' for _ in upcoming)
         embed = discord.Embed(title=f'Upcoming - Next {len(upcoming)}', description=fmt)
@@ -589,7 +622,7 @@ class GuildState:
             discord.FFmpegPCMAudio(source["formats"][0]["url"], before_options=FFMPEG_BEFORE_OPTS), volume=self.volume)
             self._guild.voice_client.play(play_source, after=lambda _ : self.bot.loop.call_soon_threadsafe(self.event.set))
             
-            self.player = await self._channel.send(embed=Videos.get_embed(self.current))
+            self.player = await self._channel.send(embed=Videos.get_embed(self.now_playing))
             await self._add_reaction_controls(self.player)
             await self.event.wait()
             # Make sure the FFmpeg process is cleaned up.

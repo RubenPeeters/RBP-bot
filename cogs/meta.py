@@ -234,7 +234,7 @@ class Meta(commands.Cog):
     @commands.command(hidden=True)
     async def hello(self, ctx):
         """Displays my intro message."""
-        await ctx.send('Hello! I\'m a robot! Danny#0007 made me.')
+        await ctx.send('Hey! :3')
 
     @commands.command()
     async def charinfo(self, ctx, *, characters: str):
@@ -341,6 +341,7 @@ class Meta(commands.Cog):
         await self.bot.set_guild_prefixes(ctx.guild, [])
         await ctx.send(ctx.tick(True))
 
+    #TODO: change to my git or add my own command like Itachi's
     @commands.command()
     async def source(self, ctx, *, command: str = None):
         """Displays my full source code or for a specific command.

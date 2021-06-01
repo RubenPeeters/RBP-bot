@@ -46,7 +46,7 @@ def _prefix_callable(bot, msg):
         base.extend(bot.prefixes.get(msg.guild.id, ['?', '!']))
     return base
 
-class RoboDanny(commands.AutoShardedBot):
+class RoBoPug(commands.AutoShardedBot):
     def __init__(self):
         allowed_mentions = discord.AllowedMentions(roles=False, everyone=False, users=True)
         intents = discord.Intents(

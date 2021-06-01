@@ -41,7 +41,8 @@ class Videos(list):
         embed.set_footer(
             text=f"Requested by {video['requested_by'].name}",
             icon_url=video['requested_by'].avatar_url)
-        thumbnail = video["thumbnail"] if "thumbnail" in video else None
+        thumbnail = "https://i.gifer.com/fxWn.gif"
+        # thumbnail = video["thumbnail"] if "thumbnail" in video else "https://i.gifer.com/fxWn.gif"
         if thumbnail:
             embed.set_thumbnail(url=thumbnail)
         return embed

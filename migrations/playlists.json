@@ -1,7 +1,7 @@
 {
     "table": {
-        "name": "feeds",
-        "__meta__": "cogs.api.Feeds",
+        "name": "playlists",
+        "__meta__": "cogs.music.MusicTable",
         "columns": [
             {
                 "column_type": {
@@ -20,18 +20,17 @@
             },
             {
                 "column_type": {
-                    "big": true,
-                    "small": false,
-                    "auto_increment": false,
-                    "__meta__": "cogs.utils.db.Integer"
+                    "length": null,
+                    "fixed": false,
+                    "__meta__": "cogs.utils.db.String"
                 },
-                "index": false,
+                "index": true,
                 "primary_key": false,
                 "nullable": true,
                 "default": null,
                 "unique": false,
-                "name": "channel_id",
-                "index_name": null
+                "name": "name",
+                "index_name": "playlists_name_idx"
             },
             {
                 "column_type": {
@@ -40,12 +39,40 @@
                     "auto_increment": false,
                     "__meta__": "cogs.utils.db.Integer"
                 },
+                "index": true,
+                "primary_key": false,
+                "nullable": true,
+                "default": null,
+                "unique": false,
+                "name": "author_id",
+                "index_name": "playlists_author_id_idx"
+            },
+            {
+                "column_type": {
+                    "length": null,
+                    "fixed": false,
+                    "__meta__": "cogs.utils.db.String"
+                },
+                "index": true,
+                "primary_key": false,
+                "nullable": true,
+                "default": null,
+                "unique": false,
+                "name": "url",
+                "index_name": "playlists_url_idx"
+            },
+            {
+                "column_type": {
+                    "length": null,
+                    "fixed": false,
+                    "__meta__": "cogs.utils.db.String"
+                },
                 "index": false,
                 "primary_key": false,
                 "nullable": true,
                 "default": null,
                 "unique": false,
-                "name": "role_id",
+                "name": "title",
                 "index_name": null
             },
             {
@@ -59,7 +86,7 @@
                 "nullable": true,
                 "default": null,
                 "unique": false,
-                "name": "name",
+                "name": "uploader",
                 "index_name": null
             }
         ]

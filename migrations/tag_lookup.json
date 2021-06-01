@@ -1,13 +1,13 @@
 {
     "table": {
-        "name": "profiles",
-        "__meta__": "cogs.profile.Profiles",
+        "name": "tag_lookup",
+        "__meta__": "cogs.tags.TagLookup",
         "columns": [
             {
                 "column_type": {
-                    "big": true,
+                    "big": false,
                     "small": false,
-                    "auto_increment": false,
+                    "auto_increment": true,
                     "__meta__": "cogs.utils.db.Integer"
                 },
                 "index": false,
@@ -24,66 +24,72 @@
                     "fixed": false,
                     "__meta__": "cogs.utils.db.String"
                 },
-                "index": false,
+                "index": true,
                 "primary_key": false,
                 "nullable": true,
                 "default": null,
                 "unique": false,
-                "name": "nnid",
-                "index_name": null
+                "name": "name",
+                "index_name": "tag_lookup_name_idx"
             },
             {
                 "column_type": {
-                    "length": null,
-                    "fixed": false,
-                    "__meta__": "cogs.utils.db.String"
+                    "big": true,
+                    "small": false,
+                    "auto_increment": false,
+                    "__meta__": "cogs.utils.db.Integer"
+                },
+                "index": true,
+                "primary_key": false,
+                "nullable": true,
+                "default": null,
+                "unique": false,
+                "name": "location_id",
+                "index_name": "tag_lookup_location_id_idx"
+            },
+            {
+                "column_type": {
+                    "big": true,
+                    "small": false,
+                    "auto_increment": false,
+                    "__meta__": "cogs.utils.db.Integer"
                 },
                 "index": false,
                 "primary_key": false,
                 "nullable": true,
                 "default": null,
                 "unique": false,
-                "name": "squad",
+                "name": "owner_id",
                 "index_name": null
             },
             {
                 "column_type": {
-                    "length": null,
-                    "fixed": false,
-                    "__meta__": "cogs.utils.db.String"
+                    "timezone": false,
+                    "__meta__": "cogs.utils.db.Datetime"
+                },
+                "index": false,
+                "primary_key": false,
+                "nullable": true,
+                "default": "now() at time zone 'utc'",
+                "unique": false,
+                "name": "created_at",
+                "index_name": null
+            },
+            {
+                "column_type": {
+                    "table": "tags",
+                    "column": "id",
+                    "on_update": "NO ACTION",
+                    "on_delete": "CASCADE",
+                    "sql_type": "INTEGER",
+                    "__meta__": "cogs.utils.db.ForeignKey"
                 },
                 "index": false,
                 "primary_key": false,
                 "nullable": true,
                 "default": null,
                 "unique": false,
-                "name": "fc_3ds",
-                "index_name": null
-            },
-            {
-                "column_type": {
-                    "length": null,
-                    "fixed": false,
-                    "__meta__": "cogs.utils.db.String"
-                },
-                "index": false,
-                "primary_key": false,
-                "nullable": true,
-                "default": null,
-                "unique": false,
-                "name": "fc_switch",
-                "index_name": null
-            },
-            {
-                "column_type": {
-                    "__meta__": "cogs.utils.db.JSON"
-                },
-                "index": false,
-                "primary_key": false,
-                "nullable": false,
-                "default": "'{}'::jsonb",
-                "unique": false,
-                "name": "extra",
+                "name": "tag_id",
                 "index_name": null
             }
         ]

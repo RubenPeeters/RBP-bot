@@ -23,7 +23,7 @@ import gc
 
 log = logging.getLogger(__name__)
 
-LOGGING_CHANNEL = 309632009427222529
+LOGGING_CHANNEL = 848373148860284958
 
 class GatewayHandler(logging.Handler):
     def __init__(self, cog):

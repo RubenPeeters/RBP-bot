@@ -7,7 +7,7 @@ import discord
 import importlib
 import contextlib
 
-from bot import RoboDanny, initial_extensions
+from bot import RoBoPug, initial_extensions
 from cogs.utils.db import Table
 
 from pathlib import Path
@@ -72,7 +72,7 @@ def run_bot():
         log.exception('Could not set up PostgreSQL. Exiting.')
         return
 
-    bot = RoboDanny()
+    bot = RoBoPug()
     bot.pool = pool
     bot.run()
 

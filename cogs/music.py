@@ -504,7 +504,7 @@ class Music(commands.Cog):
     async def clearqueue(self, ctx):
         """Clears the play queue without leaving the channel."""
         state = self.get_player(ctx)
-        self.clearqueue(state.queue)
+        await self.clearqueue(state.queue)
 
 
     @commands.command(aliases=["jq"])

@@ -8,3 +8,5 @@ migrations/current-*.json
 *.log
 venv/*
 config.py
+!cogs/*.py
+!cogs/utils/*.py

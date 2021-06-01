@@ -69,7 +69,7 @@ class BotHelpPageSource(menus.ListPageSource):
         prefix = menu.ctx.prefix
         description = f'Use "{prefix}help command" for more info on a command.\n' \
                       f'Use "{prefix}help category" for more info on a category.\n' \
-                       'For more help, join the official bot support server: https://discord.gg/DWEaqMy'
+                       'For more help, join the official bot support server: https://discord.gg/URXxWKCHMJ'
 
         embed = discord.Embed(title='Categories', description=description, colour=discord.Colour.blurple())
 
@@ -342,7 +342,7 @@ class Meta(commands.Cog):
         await ctx.send(ctx.tick(True))
 
     #TODO: change to my git or add my own command like Itachi's
-    @commands.command()
+    @commands.command(disabled=True)
     async def source(self, ctx, *, command: str = None):
         """Displays my full source code or for a specific command.
 

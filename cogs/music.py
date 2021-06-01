@@ -137,7 +137,10 @@ class Music(commands.Cog):
                    FROM jsonb_to_recordset($1::jsonb) AS x(name TEXT, author BIGINT, url TEXT, title TEXT, uploader TEXT)
                 """
         async with self._batch_lock:
-            await self.bot.pool.execute(query, self._batch_of_data)
+            try:
+                await self.bot.pool.execute(query, self._batch_of_data)
+            except Exception as e:
+                print(e)
             self._batch_of_data.clear()
 
     async def on_reaction_add(self, reaction, user):
@@ -324,6 +327,7 @@ class Music(commands.Cog):
                 count += 1
                 message += f"\t[ID]: {song['id']} - [Title]: {song['title']}\n"
                 if count > 10:
+                    message += f"... ({len(songs)} total).\n"
                     break
             message += "```"
             await ctx.send(message)
@@ -352,6 +356,7 @@ class Music(commands.Cog):
         """
             Adds the currently playing song in this guild to your specified playlist.
             Playlist defaults to 'default'.
+            Add prompt when making new playlist.
         """
         try:
             await self.register_video(ctx, playlistname)
@@ -544,7 +549,7 @@ class Music(commands.Cog):
             return
         for v in videos:
             player.queue.append(v)
-            await ctx.send(f"Added {v['title']} to the queue {len(player.queue)}")
+        await ctx.send(f"Added {len(videos)} songs to the queue.")
 
     @commands.command(name='connect', aliases=['c'])
     async def connect_(self, ctx, *, channel: discord.VoiceChannel=None):
@@ -612,10 +617,9 @@ class GuildState:
             self.event.clear()
 
             try:
-                # Wait for the next song. If we timeout cancel the player and disconnect...
-                async with timeout(300):  # 5 minutes...
-                    source = self.queue.pop(0)
-            except asyncio.TimeoutError:
+                # Wait for the next song. If we timeout cancel the player and disconnect...  # 5 minutes...
+                source = self.queue.pop(0)
+            except:
                 return self.destroy(self._guild)
             self.now_playing = source
             play_source = discord.PCMVolumeTransformer(

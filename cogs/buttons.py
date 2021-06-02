@@ -352,7 +352,7 @@ class Buttons(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
-        if payload.emoji.id != SPOILER_EMOJI_ID:
+        if payload.emoji != '👀':
             return
 
         if self._spoiler_cooldown.is_rate_limited(payload.message_id, payload.user_id):

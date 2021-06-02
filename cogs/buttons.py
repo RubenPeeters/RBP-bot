@@ -366,7 +366,8 @@ class Buttons(commands.Cog):
         embed = cache.to_embed(self.bot)
         await user.send(embed=embed)
 
-    @commands.command()
+    # no longer necessary
+    @commands.command(disabled=True)
     @can_use_spoiler()
     async def spoiler(self, ctx, title, *, text=None):
         """Marks your post a spoiler with a title.

@@ -261,7 +261,7 @@ class Buttons(commands.Cog):
             await ctx.send('PM successfully sent.')
 
     async def redirect_post(self, ctx, title, text):
-        storage = self.bot.get_guild(182325885867786241).get_channel(430229522340773899)
+        storage = self.bot.get_guild(846158225329618945).get_channel(848373148860284958)
 
         supported_attachments = ('.png', '.jpg', '.jpeg', '.webm', '.gif', '.mp4', '.txt')
         if not all(attach.filename.lower().endswith(supported_attachments) for attach in ctx.message.attachments):

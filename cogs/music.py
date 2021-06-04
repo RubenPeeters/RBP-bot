@@ -290,7 +290,6 @@ class Music(commands.Cog):
 
     @commands.command(aliases=["plremove"])
     @commands.guild_only()
-    @commands.has_permissions(administrator=True)
     async def playlist_remove(self, ctx, id,*, playlistname = 'default'):
         """
             Delete a song from your playlist by ID and playlistname
@@ -305,7 +304,6 @@ class Music(commands.Cog):
 
     @commands.command(aliases=["pllist"])
     @commands.guild_only()
-    @commands.has_permissions(administrator=True)
     async def playlist_list(self, ctx, *, playlistname = 'default'):
         """
             List your playlist
@@ -328,7 +326,6 @@ class Music(commands.Cog):
 
     @commands.command(aliases=["plplay","playplaylist"])
     @commands.guild_only()
-    @commands.has_permissions(administrator=True)
     async def playlist_play(self, ctx, *, playlistname = 'default'):
         """
             Play your playlist
@@ -343,7 +340,6 @@ class Music(commands.Cog):
     
     @commands.command(aliases=["pladd"])
     @commands.guild_only()
-    @commands.has_permissions(administrator=True)
     async def playlist_add(self, ctx, playlistname = 'default'):
         """
             Adds the currently playing song in this guild to your specified playlist.
@@ -358,7 +354,6 @@ class Music(commands.Cog):
 
     @commands.command(aliases=["stop"])
     @commands.guild_only()
-    @commands.has_permissions(administrator=True)
     async def leave(self, ctx):
         """Leaves the voice channel, if currently in one."""
         client = ctx.guild.voice_client
